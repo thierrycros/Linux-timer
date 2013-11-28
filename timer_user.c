@@ -1,34 +1,48 @@
-﻿#include <stdio.h>  
-#include <time.h>  
-#include <sys/time.h>  
-#include <stdlib.h>  
-#include <signal.h>  
+#include <stdio.h>
+#include <time.h>
+#include <sys/time.h>
+#include <stdlib.h>
+#include <signal.h>
     
-static int count = 0;  
-static struct itimerval oldtv;  
+
+# define false 0
+# define true 1
+# define DUREE_TOMATE_EN_MINUTES 10
+
+
+static int continuer = true;
+
+static struct itimerval vieilleValeurTimer;
     
-void set_timer()  
-{  
-    struct itimerval itv;  
-    itv.it_interval.tv_sec = 1;  
-    itv.it_interval.tv_usec = 0;  
-    itv.it_value.tv_sec = 1;  
-    itv.it_value.tv_usec = 0;  
-    setitimer(ITIMER_REAL, &itv, &oldtv); //ITIMER_REAL : 以系统真实的时间来计算
-}  
+void set_timer(int minutes)
+{
+    struct itimerval leTimer;
+
+printf("Début d'une tomate de %d minutes... \n", minutes);
+
+    leTimer.it_interval.tv_sec = minutes * 60;
+    leTimer.it_interval.tv_usec = 0;
+    leTimer.it_value.tv_sec = minutes * 60;
+    leTimer.it_value.tv_usec = 0;
+    setitimer(ITIMER_REAL, &leTimer, &vieilleValeurTimer); 
+}
       
-void signal_handler(int m)  
-{  
-    count ++;  
-    printf("%d\n", count);  
-}  
+void signal_handler(int m)
+{
+    continuer = false;
+    printf("Fin d'une tomate de %d minutes.\n", 
+                    DUREE_TOMATE_EN_MINUTES);
+}
       
-int main()  
-{  
-    signal(SIGALRM, signal_handler);    //SIGALRM信号对应signal_handler 
-    set_timer();                        //它送出SIGALRM信号
-    while(count < 10000);  
+int main()
+{
+    signal(SIGALRM, signal_handler); 
+
     
-    exit(0);  
-    return 1;  
-}  
+    set_timer(DUREE_TOMATE_EN_MINUTES); 
+
+    while(continuer == true);
+    
+    exit(0);
+    return 0;
+} 
