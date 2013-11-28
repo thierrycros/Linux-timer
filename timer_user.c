@@ -7,18 +7,17 @@
 
 # define false 0
 # define true 1
-# define DUREE_TOMATE_EN_MINUTES 10
+# define DUREE_TOMATE_EN_MINUTES 25
 
-
-static int continuer = true;
 
 static struct itimerval vieilleValeurTimer;
+static int minutes = 0;
     
-void set_timer(int minutes)
+void set_timer()
 {
     struct itimerval leTimer;
 
-printf("Début d'une tomate de %d minutes... \n", minutes);
+    printf("Début d'une tomate de %d minutes... \n", minutes);
 
     leTimer.it_interval.tv_sec = minutes * 60;
     leTimer.it_interval.tv_usec = 0;
@@ -29,20 +28,23 @@ printf("Début d'une tomate de %d minutes... \n", minutes);
       
 void signal_handler(int m)
 {
-    continuer = false;
     printf("Fin d'une tomate de %d minutes.\n", 
-                    DUREE_TOMATE_EN_MINUTES);
+                    minutes);
 }
       
-int main()
+int main(int argc, char * argv[])
 {
+
+    if (argc == 2)
+        sscanf(argv[1], "%d", &minutes);
+    else
+        minutes = DUREE_TOMATE_EN_MINUTES;
+
     signal(SIGALRM, signal_handler); 
+    set_timer(minutes); 
 
-    
-    set_timer(DUREE_TOMATE_EN_MINUTES); 
+    pause();
 
-    while(continuer == true);
-    
     exit(0);
     return 0;
 } 
